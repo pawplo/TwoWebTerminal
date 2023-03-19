@@ -1,41 +1,24 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+    margin: 0px;
+    padding: 0px;
+}
+
+.terminals {
+    display: flex;
     flex-direction: column;
-    width: 800px;
-    height: 550px;
+    width: 100%;
+    height: 100%;
     justify-content: space-between;
-}
-
-#outDiv {
-    width: 100%;
-}
-
-#term_window {
-    width: 100%;
-    height: 400px;
-}
-
-#inDiv {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#term_input {
-    width: 85%;
-    height: 20px;
-}
-
-#setDiv {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#port_info {
-    width: 500px;
+    margin: 0px;
+    padding: 0px;
+    background-color: grey;
 }
