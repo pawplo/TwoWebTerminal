@@ -6,19 +6,6 @@ body {
     justify-content: space-between;
 }
 
-#titleDiv {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: left;
-    align-items: center;    
-}
-
-#title {
-    font-size: 30pt;
-    margin-left: 50px;
-}
-
 #outDiv {
     width: 100%;
 }
@@ -46,7 +33,7 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;    
+    align-items: center;
 }
 
 #port_info {
