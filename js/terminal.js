@@ -70,7 +70,7 @@ class terminal extends HTMLElement
                         this.reader.releaseLock()
                         break
                     }
-                    this.shadowRoot.getElementById("term_window").value += "\n" + value
+                    this.shadowRoot.getElementById("term_window").value += value
                 }
 
                 await readable_stream_closed.catch(() => {})
@@ -111,8 +111,8 @@ class terminal extends HTMLElement
       const writable_stream_closed = text_encoder.readable.pipeTo(this.port.writable)
       const writer = text_encoder.writable.getWriter()
 
-      await writer.write(out_string)
-      this.shadowRoot.getElementById("term_window").value += "\n>" + out_string
+      await writer.write(out_string+"\n")
+      this.shadowRoot.getElementById("term_window").value += "\n>" + out_string +"\n"
 
       writer.close()
       await writable_stream_closed
