@@ -14,6 +14,9 @@ class terminal extends HTMLElement
 
         this.dtr = this.dtr.bind(this)
         this.rts = this.rts.bind(this)
+
+        this.dtr_on_off = this.dtr_on_off.bind(this)
+        this.rts_on_off = this.rts_on_off.bind(this)
     }
 
     async open_close()
@@ -62,6 +65,9 @@ class terminal extends HTMLElement
                 this.shadowRoot.getElementById("dtr_button").disabled = false
                 this.shadowRoot.getElementById("rts_button").disabled = false
 
+                this.shadowRoot.getElementById("dtr_checkbox").disabled = false
+                this.shadowRoot.getElementById("rts_checkbox").disabled = false
+
                 let port_infonfo = this.port.getInfo()
                 console.log(port_infonfo)
                 this.shadowRoot.getElementById("port_info").innerText =
@@ -91,6 +97,9 @@ class terminal extends HTMLElement
 
                 this.shadowRoot.getElementById("dtr_button").disabled = true
                 this.shadowRoot.getElementById("rts_button").disabled = true
+
+                this.shadowRoot.getElementById("dtr_checkbox").disabled = true
+                this.shadowRoot.getElementById("rts_checkbox").disabled = true
 
                 console.log("port closed")
                 resolve()
@@ -127,20 +136,41 @@ class terminal extends HTMLElement
       await writable_stream_closed
     }
 
+    dtr_on(b)
+    {
+        if (b) {
+            this.shadowRoot.getElementById("dtr_checkbox").checked = true
+            this.port.setSignals({ dataTerminalReady: false })
+        } else {
+            this.shadowRoot.getElementById("dtr_checkbox").checked = false
+            this.port.setSignals({ dataTerminalReady: true })
+        }
+    }
+
     async dtr()
     {
         let ms = this.shadowRoot.getElementById("dtr_input").value
-        await this.port.setSignals({ dataTerminalReady: false });
-        await new Promise(resolve => setTimeout(resolve, Number(ms)));
-        await this.port.setSignals({ dataTerminalReady: true });
+        await this.port.setSignals({ dataTerminalReady: false })
+        await new Promise(resolve => setTimeout(resolve, Number(ms)))
+        await this.port.setSignals({ dataTerminalReady: true })
     }
 
     async rts()
     {
         let ms = this.shadowRoot.getElementById("rts_input").value
-        await this.port.setSignals({ requestToSend : false });
-        await new Promise(resolve => setTimeout(resolve, Number(ms)));
-        await this.port.setSignals({ requestToSend: true });
+        await this.port.setSignals({ requestToSend : false })
+        await new Promise(resolve => setTimeout(resolve, Number(ms)))
+        await this.port.setSignals({ requestToSend: true })
+    }
+
+    dtr_on_off()
+    {
+        this.port.setSignals({ dataTerminalReady: ! this.shadowRoot.getElementById("dtr_checkbox").checked })
+    }
+
+    rts_on_off()
+    {
+        this.port.setSignals({ requestToSend : ! this.shadowRoot.getElementById("rts_checkbox").checked })
     }
 
     clear_terminal()
@@ -234,6 +264,12 @@ class terminal extends HTMLElement
                 <button id="rts_button" disabled>RTS</button>
             </div>
             <div class="flex_row">
+                <input type="checkbox" id="dtr_checkbox" disabled>DTR</input>
+            </div>
+            <div class="flex_row">
+                <input type="checkbox" id="rts_checkbox" disabled>RTS</input>
+            </div>
+            <div class="flex_row">
                 <span id="port_info">Disconnected</span>
             </div>
 
@@ -260,6 +296,9 @@ class terminal extends HTMLElement
 
             this.shadowRoot.getElementById("dtr_button").addEventListener("click", this.dtr)
             this.shadowRoot.getElementById("rts_button").addEventListener("click", this.rts)
+
+            this.shadowRoot.getElementById("dtr_checkbox").addEventListener("click", this.dtr_on_off)
+            this.shadowRoot.getElementById("rts_checkbox").addEventListener("click", this.rts_on_off)
 
             this.clear_terminal()
 
