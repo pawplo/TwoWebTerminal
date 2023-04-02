@@ -5,5 +5,44 @@
 
 <script src="js/terminal.js"></script>
 
-<term-inal class="terminals"></term-inal>
-<term-inal class="terminals"></term-inal>
+<div class="terminals">
+<term-inal id="terminal1" class="terminal"></term-inal>
+<term-inal id="terminal2" class="terminal"></term-inal>
+</div>
+
+
+<div>
+    <button id="clear_all">Clear All</button>
+<!--
+   <button id="dtr_on_all">DTR On All</button>
+    <button id="rts_on_all">RTS On All</button>
+-->
+</div>
+
+<script>
+    function clear_all()
+    {
+        document.getElementById("terminal1").clear_terminal()
+        document.getElementById("terminal2").clear_terminal()
+    }
+
+    document.getElementById("clear_all").addEventListener("click", clear_all)
+/*
+    function dtr_on_all()
+    {
+        document.getElementById("terminal1").dtr_on(true)
+        document.getElementById("terminal2").dtr_on(true)
+    }
+
+    function rts_on_all()
+    {
+        document.getElementById("terminal1").rts_on(true)
+        document.getElementById("terminal2").rts_on(true)
+    }
+
+    document.getElementById("dtr_on_all").addEventListener("click", dtr_on_all)
+    document.getElementById("rts_on_all").addEventListener("click", rts_on_all)
+*/
+
+</script>
+
