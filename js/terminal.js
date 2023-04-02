@@ -11,6 +11,9 @@ class terminal extends HTMLElement
         this.send_string = this.send_string.bind(this)
         this.clear_terminal = this.clear_terminal.bind(this)
         this.detect_enter = this.detect_enter.bind(this)
+
+        this.dtr = this.dtr.bind(this)
+        this.rts = this.rts.bind(this)
     }
 
     async open_close()
@@ -56,6 +59,9 @@ class terminal extends HTMLElement
                 this.shadowRoot.getElementById("clear").disabled = false
                 this.shadowRoot.getElementById("change").disabled = false
 
+                this.shadowRoot.getElementById("dtr_button").disabled = false
+                this.shadowRoot.getElementById("rts_button").disabled = false
+
                 let port_infonfo = this.port.getInfo()
                 console.log(port_infonfo)
                 this.shadowRoot.getElementById("port_info").innerText =
@@ -82,6 +88,9 @@ class terminal extends HTMLElement
                 this.shadowRoot.getElementById("send").disabled = true
                 this.shadowRoot.getElementById("change").disabled = true
                 this.shadowRoot.getElementById("port_info").innerText = "Disconnected"
+
+                this.shadowRoot.getElementById("dtr_button").disabled = true
+                this.shadowRoot.getElementById("rts_button").disabled = true
 
                 console.log("port closed")
                 resolve()
@@ -118,6 +127,22 @@ class terminal extends HTMLElement
       await writable_stream_closed
     }
 
+    async dtr()
+    {
+        let ms = this.shadowRoot.getElementById("dtr_input").value
+        await this.port.setSignals({ dataTerminalReady: false });
+        await new Promise(resolve => setTimeout(resolve, Number(ms)));
+        await this.port.setSignals({ dataTerminalReady: true });
+    }
+
+    async rts()
+    {
+        let ms = this.shadowRoot.getElementById("rts_input").value
+        await this.port.setSignals({ requestToSend : false });
+        await new Promise(resolve => setTimeout(resolve, Number(ms)));
+        await this.port.setSignals({ requestToSend: true });
+    }
+
     clear_terminal()
     {
       this.shadowRoot.getElementById("term_window").value = ""
@@ -147,7 +172,7 @@ class terminal extends HTMLElement
                 padding: 0px;
             }
 
-            #out_div {
+            #term_window_div {
                 width: 100%;
                 margin: 0px;
                 margin: 0px;
@@ -161,46 +186,33 @@ class terminal extends HTMLElement
                 padding: 0px;
             }
 
-            #in_div {
+            .flex_row {
                 width: 100%;
                 display: flex;
                 flex-direction: row;
-                justify-content: space-between;
-                align-items: flex-start;
+                //justify-content: space-between;
+                align-items: left;//flex-start;
             }
 
             #term_input {
                 width: 95%;
                 height: 20px;
             }
-
-            #set_div {
-                width: 100%;
-                display: flex;
-                flex-direction: row;
-                //justify-content: space-between;
-                align-items: left;
-            }
-
-            #inf_div {
-              width: 100%;
-              display: flex;
-              flex-direction: row;
-              //justify-content: space-between;
-              align-items: left;
+            .number_input {
+                width: 60px;
             }
         `
 
         const html = `
-            <div id="out_div">
+            <div id="term_window_div">
                 <textarea id="term_window" readonly></textarea>
             </div>
-            <div id="in_div">
+            <div class="flex_row">
                 <input type="text" id="term_input"></input>
                 <button id="send" disabled>Send</button>
                 <button id="clear" disabled>Clear</button>
             </div>
-            <div id="set_div">
+            <div class="flex_row">
                 <button id="openclose_port">Open</button>
                 <div>
                     <span>Baud Rate: </span>
@@ -213,7 +225,15 @@ class terminal extends HTMLElement
                     </select><button id="change" disabled>Change</button>
                 </div>
             </div>
-            <div id="info_div">
+            <div class="flex_row">
+                <input class="number_input" type="number" min="1" step="1" value="1000" id="dtr_input"></input>
+                <button id="dtr_button" disabled>DTR</button>
+            </div>
+            <div class="flex_row">
+                <input class="number_input" type="number" min="1" step="1" value="1000" id="rts_input"></input>
+                <button id="rts_button" disabled>RTS</button>
+            </div>
+            <div class="flex_row">
                 <span id="port_info">Disconnected</span>
             </div>
 
@@ -237,6 +257,9 @@ class terminal extends HTMLElement
             this.shadowRoot.getElementById("clear").addEventListener("click", this.clear_terminal)
             this.shadowRoot.getElementById("send").addEventListener("click", this.send_string)
             this.shadowRoot.getElementById("term_input").addEventListener("keydown", this.detect_enter)
+
+            this.shadowRoot.getElementById("dtr_button").addEventListener("click", this.dtr)
+            this.shadowRoot.getElementById("rts_button").addEventListener("click", this.rts)
 
             this.clear_terminal()
 
