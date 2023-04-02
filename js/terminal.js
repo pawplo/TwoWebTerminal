@@ -305,30 +305,20 @@ class terminal extends HTMLElement
 
             #term_window_div {
                 width: 100%;
-                margin: 0px;
-                margin: 0px;
-                padding: 0px;
             }
 
             #term_window {
                 width: 100%;
                 height: 600px;
-                margin: 0px;
-                padding: 0px;
             }
 
             #script_window_div {
                 width: 100%;
-                margin: 0px;
-                margin: 0px;
-                padding: 0px;
             }
 
             #script_window {
                 width: 100%;
                 height: 600px;
-                margin: 0px;
-                padding: 0px;
             }
 
             #script_tab_div {
@@ -442,6 +432,10 @@ class terminal extends HTMLElement
                 "if (line == \"qwerty\") {\n"+
                 "    console.log(\"[script send_line] [ytrewq]\")\n"+
                 "    this.send_string(\"ytrewq\")\n"+
+                "}\n"+
+                "if (line == \"now\") {\n"+
+                "    this.send_string(\"now \"+\n"+
+                "        (Math.trunc(Date.now() / 1000) - 1680459000))\n"+
                 "}\n"
             this.clear_terminal()
 
