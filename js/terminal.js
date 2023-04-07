@@ -5,32 +5,6 @@ class terminal extends HTMLElement
         super()
         this.port_open = false
         this.hold_port = null
-
-        this.open_close = this.open_close.bind(this)
-        this.change_settings = this.change_settings.bind(this)
-        this.send_string = this.send_string.bind(this)
-        this.send_string_input = this.send_string_input.bind(this)
-        this.clear_terminal = this.clear_terminal.bind(this)
-        this.detect_enter = this.detect_enter.bind(this)
-
-        this.read_line_script = this.read_line_script.bind(this)
-
-        this.dtr_on_ms_button_clicked = this.dtr_on_ms_button_clicked.bind(this)
-        this.dtr_off_ms_button_clicked = this.dtr_off_ms_button_clicked.bind(this)
-        this.rts_on_ms_button_clicked = this.rts_on_ms_button_clicked.bind(this)
-        this.rts_off_ms_button_clicked = this.rts_off_ms_button_clicked.bind(this)
-
-        this.dtr_on = this.dtr_on.bind(this)
-        this.rts_on = this.rts_on.bind(this)
-
-        this.dtr_on_off_ms = this.dtr_on_off_ms.bind(this)
-        this.rts_on_off_ms = this.rts_on_off_ms.bind(this)
-
-        this.dtr_checkbox_clicked = this.dtr_checkbox_clicked.bind(this)
-        this.rts_checkbox_clicked = this.rts_checkbox_clicked.bind(this)
-
-        this.active_term_tab = this.active_term_tab.bind(this)
-        this.active_script_tab = this.active_script_tab.bind(this)
     }
 
     async open_close()
@@ -56,7 +30,7 @@ class terminal extends HTMLElement
                     this.port = this.hold_port
                     this.hold_port = null
                 }
-                var baud_selected = parseInt(this.baud_rate_select.value)
+                var baud_selected = parseInt(this.shadowRoot.getElementById("baud_rate").value)
                 try {
                     await this.port.open({ baudRate: baud_selected })
                 } catch(e) {
@@ -244,6 +218,7 @@ class terminal extends HTMLElement
 
     clear_terminal()
     {
+        console.log("clear_terminal()")
         this.shadowRoot.getElementById("term_window").value = ""
 //        eval("this.shadowRoot.getElementById(\"term_window\").value = \"\"")
     }
@@ -405,28 +380,25 @@ class terminal extends HTMLElement
             </style>
             ${html}
         `
-        this.openclose_port_button = this.shadowRoot.getElementById("openclose_port")
-        this.baud_rate_select = this.shadowRoot.getElementById("baud_rate")
-        console.log(this.baud_rate_select)
 
         if ("serial" in navigator) {
-            this.openclose_port_button.addEventListener("click", this.open_close)
+            this.shadowRoot.getElementById("openclose_port").addEventListener("click", this.open_close.bind(this))
 
-            this.shadowRoot.getElementById("change").addEventListener("click", this.change_settings)
-            this.shadowRoot.getElementById("clear").addEventListener("click", this.clear_terminal)
-            this.shadowRoot.getElementById("send").addEventListener("click", this.send_string_input)
-            this.shadowRoot.getElementById("term_input").addEventListener("keydown", this.detect_enter)
+            this.shadowRoot.getElementById("change").addEventListener("click", this.change_settings.bind(this))
+            this.shadowRoot.getElementById("clear").addEventListener("click", this.clear_terminal.bind(this))
+            this.shadowRoot.getElementById("send").addEventListener("click", this.send_string_input.bind(this))
+            this.shadowRoot.getElementById("term_input").addEventListener("keydown", this.detect_enter.bind(this))
 
-            this.shadowRoot.getElementById("dtr_on_ms_button").addEventListener("click", this.dtr_on_ms_button_clicked)
-            this.shadowRoot.getElementById("dtr_off_ms_button").addEventListener("click", this.dtr_off_ms_button_clicked)
-            this.shadowRoot.getElementById("rts_on_ms_button").addEventListener("click", this.rts_on_ms_button_clicked)
-            this.shadowRoot.getElementById("rts_off_ms_button").addEventListener("click", this.rts_off_ms_button_clicked)
+            this.shadowRoot.getElementById("dtr_on_ms_button").addEventListener("click", this.dtr_on_ms_button_clicked.bind(this))
+            this.shadowRoot.getElementById("dtr_off_ms_button").addEventListener("click", this.dtr_off_ms_button_clicked.bind(this))
+            this.shadowRoot.getElementById("rts_on_ms_button").addEventListener("click", this.rts_on_ms_button_clicked.bind(this))
+            this.shadowRoot.getElementById("rts_off_ms_button").addEventListener("click", this.rts_off_ms_button_clicked.bind(this))
 
-            this.shadowRoot.getElementById("dtr_checkbox").addEventListener("click", this.dtr_checkbox_clicked)
-            this.shadowRoot.getElementById("rts_checkbox").addEventListener("click", this.rts_checkbox_clicked)
+            this.shadowRoot.getElementById("dtr_checkbox").addEventListener("click", this.dtr_checkbox_clicked.bind(this))
+            this.shadowRoot.getElementById("rts_checkbox").addEventListener("click", this.rts_checkbox_clicked.bind(this))
 
-            this.shadowRoot.getElementById("term_tab").addEventListener("click", this.active_term_tab)
-            this.shadowRoot.getElementById("script_tab").addEventListener("click", this.active_script_tab)
+            this.shadowRoot.getElementById("term_tab").addEventListener("click", this.active_term_tab.bind(this))
+            this.shadowRoot.getElementById("script_tab").addEventListener("click", this.active_script_tab.bind(this))
             this.shadowRoot.getElementById("script_window").value =
                 "console.log(\"[script] [\"+line+\"]\")\n"+
                 "if (line == \"qwerty\") {\n"+
