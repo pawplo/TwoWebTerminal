@@ -74,12 +74,13 @@ class terminal extends HTMLElement
                         this.reader.releaseLock()
                         break
                     }
-                    this.shadowRoot.getElementById("term_window").value += value
+//                    this.shadowRoot.getElementById("term_window").value += value
                     this.read_text += value
 
                     let newline_index = this.read_text.search("\n")
                     while(newline_index >= 0) {
-                        this.read_line_script(this.read_text.substring(0, newline_index))
+                        let line = this.read_text.substring(0, newline_index)
+                        this.add_line(line, "line_read")
                         this.read_text = this.read_text.substring(newline_index + 1, this.read_text.length)
                         newline_index = this.read_text.search("\n")
                     }
@@ -111,6 +112,53 @@ class terminal extends HTMLElement
         return
     }
 
+    add_line(line, line_read_or_write)
+    {
+        var last_is_code = false;
+        var inner_text = ""
+        inner_text +=
+            "<span class='"+line_read_or_write+"'>"
+
+        for (let i = 0; i < line.length; i++) {
+            if (line[i].charCodeAt() < 32 || line[i].charCodeAt() > 126) {
+                if (last_is_code == false) {
+                    inner_text +=
+                        "</span></br><span class='"+line_read_or_write+"_code'>"
+                }
+                inner_text +=
+                    "\\x"+line[i].charCodeAt()
+                last_is_code = true;
+
+            } else {
+                if (last_is_code == true) {
+                    inner_text +=
+                        "</span></br><span class='"+line_read_or_write+"'>"
+                }
+
+                if (line[i] == '<') {
+                    inner_text += "&lt;"
+
+                } else if (line[i] == '>') {
+                    inner_text += "&gt;"
+
+                } else {
+                    inner_text += line[i]
+                }
+                last_is_code = false;
+            }
+        }
+
+        inner_text += "</span></br>"
+        this.shadowRoot.getElementById("term_window").innerHTML += inner_text
+
+        this.shadowRoot.getElementById("term_window").scrollTop =
+            this.shadowRoot.getElementById("term_window").scrollHeight;
+
+        if (line_read_or_write == "line_read") {
+            this.read_line_script(line)
+        }
+    }
+
     async change_settings()
     {
         this.hold_port = this.port
@@ -133,7 +181,8 @@ class terminal extends HTMLElement
         const writer = text_encoder.writable.getWriter()
 
         await writer.write(out_string+"\n")
-        this.shadowRoot.getElementById("term_window").value += "\n>" + out_string +"\n"
+//        this.shadowRoot.getElementById("term_window").value += "\n>" + out_string +"\n"
+        this.add_line(out_string, "line_write")
 
         writer.close()
         await writable_stream_closed
@@ -219,7 +268,8 @@ class terminal extends HTMLElement
     clear_terminal()
     {
         console.log("clear_terminal()")
-        this.shadowRoot.getElementById("term_window").value = ""
+//        this.shadowRoot.getElementById("term_window").value = ""
+        this.shadowRoot.getElementById("term_window").innerHTML = ""
 //        eval("this.shadowRoot.getElementById(\"term_window\").value = \"\"")
     }
 
@@ -285,6 +335,27 @@ class terminal extends HTMLElement
             #term_window {
                 width: 100%;
                 height: 600px;
+                background-color: white;
+                font-family: monospace;
+                overflow: scroll;
+            }
+            .line_read {
+                background-color: white;
+                color: red;
+            }
+            .line_read_code {
+                background-color: red;
+                color: white;
+            }
+
+            .line_write {
+                background-color: yellow;
+                color: black;
+
+            }
+            .line_write_code {
+                background-color: black;
+                color: yellow;
             }
 
             #script_window_div {
@@ -305,7 +376,7 @@ class terminal extends HTMLElement
                 display: flex;
                 flex-direction: row;
                 //justify-content: space-between;
-                align-items: left;//flex-start;
+                align-items: stretch; //left;//flex-start;
             }
 
             #term_input {
@@ -325,7 +396,7 @@ class terminal extends HTMLElement
 
         <div id="term_tab_div">
             <div id="term_window_div">
-                <textarea id="term_window" readonly></textarea>
+                <div id="term_window" readonly></div>
             </div>
             <div class="flex_row">
                 <input type="text" id="term_input"></input>
