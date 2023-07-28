@@ -74,6 +74,12 @@ class terminal extends HTMLElement
                         this.reader.releaseLock()
                         break
                     }
+
+                    if (value[0] == '\x00') {
+                        console.log("read value[0] == '\\x00'");
+                        break
+                    }
+
 //                    this.shadowRoot.getElementById("term_window").value += value
                     this.read_text += value
 
@@ -365,11 +371,11 @@ class terminal extends HTMLElement
 
             .line_write {
                 background-color: white;
-                color: palegreen;
+                color: limegreen;
 
             }
             .line_write_code {
-                background-color: palegreen;
+                background-color: limegreen;
                 color: white;
             }
             .line_date {
