@@ -77,7 +77,7 @@ class terminal extends HTMLElement
 
                     if (value[0] == '\x00') {
                         console.log("read value[0] == '\\x00'");
-                        break
+                        continue
                     }
 
 //                    this.shadowRoot.getElementById("term_window").value += value
