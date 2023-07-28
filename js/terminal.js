@@ -112,10 +112,25 @@ class terminal extends HTMLElement
         return
     }
 
+    num2str(num)
+    {
+        var s = ""
+        if (num < 10) {
+            s += "0"
+        }
+        s += num.toString()
+        return s
+    }
+
     add_line(line, line_read_or_write)
     {
         var last_is_code = false;
         var inner_text = ""
+        inner_text += "<span class='line_date'>"
+        const d =  new Date();
+        inner_text += (this.num2str(d.getHours())+":"+this.num2str(d.getMinutes())+":"+this.num2str(d.getSeconds()))
+        inner_text += "</span>"
+
         inner_text +=
             "<span class='"+line_read_or_write+"'>"
 
@@ -349,15 +364,18 @@ class terminal extends HTMLElement
             }
 
             .line_write {
-                background-color: yellow;
-                color: black;
+                background-color: white;
+                color: palegreen;
 
             }
             .line_write_code {
-                background-color: black;
-                color: yellow;
+                background-color: palegreen;
+                color: white;
             }
-
+            .line_date {
+                background-color: deepskyblue;
+                color: white;
+            }
             #script_window_div {
                 width: 100%;
             }
