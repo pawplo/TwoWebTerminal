@@ -5,6 +5,16 @@ class terminal extends HTMLElement
         super()
         this.port_open = false
         this.hold_port = null
+
+        this.default_script_read =
+            "if (line == 'qwerty') {\n"+
+            "    line_write = 'ytrewq'\n"+
+            "}\n"
+
+        this.default_script_write =
+            "if (line == 'bubu') {\n"+
+            "    line = 'BUBU'\n"+
+            "}\n"
     }
 
     async open_close()
@@ -68,6 +78,9 @@ class terminal extends HTMLElement
                     " and PID " +
                     port_infonfo.usbProductId
 
+                    this.shadowRoot.getElementById("term_input").focus()
+this.add_line("now", "line_read")
+
                 while (true) {
                     const { value, done } = await this.reader.read()
                     if (done) {
@@ -130,6 +143,7 @@ class terminal extends HTMLElement
 
     add_line(line, line_read_or_write)
     {
+        console.log("add_line ["+line+"]")
         var last_is_code = false;
         var inner_text = ""
         inner_text += "<span class='line_date'>"
@@ -193,18 +207,16 @@ class terminal extends HTMLElement
 
     async send_string(out_string)
     {
-        if (!this.port_open) {
+        if (!this.port_open)
             return
-        }
 
         const text_encoder = new TextEncoderStream()
         const writable_stream_closed = text_encoder.readable.pipeTo(this.port.writable)
         const writer = text_encoder.writable.getWriter()
 
         await writer.write(out_string+"\n")
-//        this.shadowRoot.getElementById("term_window").value += "\n>" + out_string +"\n"
-        this.add_line(out_string, "line_write")
 
+        this.add_line(out_string, "line_write")
         writer.close()
         await writable_stream_closed
 
@@ -212,17 +224,18 @@ class terminal extends HTMLElement
 
     async send_string_input()
     {
-        let out_string = this.shadowRoot.getElementById("term_input").value
+        let line = this.shadowRoot.getElementById("term_input").value
         this.shadowRoot.getElementById("term_input").value = ""
 
-        await this.send_string(out_string)
+        eval(this.shadowRoot.getElementById("script_write_textarea").value)
+
+        await this.send_string(line)
      }
 
     async dtr_on(b)
     {
-        if (!this.port_open) {
+        if (!this.port_open)
             return
-        }
 
         this.shadowRoot.getElementById("dtr_on_ms_button").disabled = b
         this.shadowRoot.getElementById("dtr_off_ms_button").disabled = !b
@@ -232,9 +245,8 @@ class terminal extends HTMLElement
 
     async rts_on(b)
     {
-        if (!this.port_open) {
+        if (!this.port_open)
             return
-        }
 
         this.shadowRoot.getElementById("rts_on_ms_button").disabled = b
         this.shadowRoot.getElementById("rts_off_ms_button").disabled = !b
@@ -247,7 +259,7 @@ class terminal extends HTMLElement
         this.dtr_on(b)
         await new Promise(resolve => setTimeout(resolve, ms))
         this.dtr_on(!b)
-}
+    }
 
     async rts_on_off_ms(ms, b)
     {
@@ -289,22 +301,23 @@ class terminal extends HTMLElement
     clear_terminal()
     {
         console.log("clear_terminal()")
-//        this.shadowRoot.getElementById("term_window").value = ""
         this.shadowRoot.getElementById("term_window").innerHTML = ""
-//        eval("this.shadowRoot.getElementById(\"term_window\").value = \"\"")
     }
 
-    read_line_script(line)
+    async read_line_script(line)
     {
-//        console.log("["+line+"]");
-        eval("let line = \""+line+"\"; "+this.shadowRoot.getElementById("script_window").value)
+        let line_write = ''
+        eval(this.shadowRoot.getElementById("script_read_textarea").value)
+
+        if (line_write != '') {
+            await this.send_string(line_write);
+        }
     }
 
     detect_enter(e)
     {
-        if (!this.port_open) {
+        if (!this.port_open)
             return
-        }
 
         if (e.keyCode == 13) {
             e.preventDefault()
@@ -316,18 +329,53 @@ class terminal extends HTMLElement
     active_term_tab()
     {
         this.shadowRoot.getElementById("term_tab").style.backgroundColor = "white"
-        this.shadowRoot.getElementById("script_tab").style.backgroundColor = "grey"
+        this.shadowRoot.getElementById("script_read_tab").style.backgroundColor = "grey"
+        this.shadowRoot.getElementById("script_write_tab").style.backgroundColor = "grey"
         this.shadowRoot.getElementById("term_tab_div").style.display = "block"
-        this.shadowRoot.getElementById("script_tab_div").style.display = "none"
+        this.shadowRoot.getElementById("script_read_tab_div").style.display = "none"
+        this.shadowRoot.getElementById("script_write_tab_div").style.display = "none"
     }
 
-    active_script_tab()
+    active_script_read_tab()
     {
         this.shadowRoot.getElementById("term_tab").style.backgroundColor = "grey"
-        this.shadowRoot.getElementById("script_tab").style.backgroundColor = "white"
+        this.shadowRoot.getElementById("script_read_tab").style.backgroundColor = "white"
+        this.shadowRoot.getElementById("script_write_tab").style.backgroundColor = "grey"
         this.shadowRoot.getElementById("term_tab_div").style.display = "none"
-        this.shadowRoot.getElementById("script_tab_div").style.display = "block"
+        this.shadowRoot.getElementById("script_read_tab_div").style.display = "block"
+        this.shadowRoot.getElementById("script_write_tab_div").style.display = "none"
     }
+
+    active_script_write_tab()
+    {
+        this.shadowRoot.getElementById("term_tab").style.backgroundColor = "grey"
+        this.shadowRoot.getElementById("script_read_tab").style.backgroundColor = "grey"
+        this.shadowRoot.getElementById("script_write_tab").style.backgroundColor = "white"
+        this.shadowRoot.getElementById("term_tab_div").style.display = "none"
+        this.shadowRoot.getElementById("script_read_tab_div").style.display = "none"
+        this.shadowRoot.getElementById("script_write_tab_div").style.display = "block"
+    }
+
+    script_read_save_clicked()
+    {
+        localStorage.setItem("script_read", this.shadowRoot.getElementById("script_read_textarea").value)
+    }
+    script_read_restore_default_clicked()
+    {
+        localStorage.removeItem("script_read")
+        this.shadowRoot.getElementById("script_read_textarea").value = this.default_script_read
+    }
+    script_write_save_clicked()
+    {
+        localStorage.setItem("script_write", this.shadowRoot.getElementById("script_write_textarea").value)
+
+    }
+    script_write_restore_default_clicked()
+    {
+        localStorage.removeItem("script_write")
+        this.shadowRoot.getElementById("script_write_textarea").value = this.default_script_write
+    }
+
 
     connectedCallback()
     {
@@ -345,7 +393,11 @@ class terminal extends HTMLElement
                 background-color: white;
             }
 
-            #script_tab {
+            #script_read_tab {
+                background-color: grey;
+            }
+
+            #script_write_tab {
                 background-color: grey;
             }
 
@@ -382,16 +434,16 @@ class terminal extends HTMLElement
                 background-color: deepskyblue;
                 color: white;
             }
-            #script_window_div {
+            .script_window_class {
                 width: 100%;
             }
 
-            #script_window {
+            .script_textarea_class {
                 width: 100%;
                 height: 600px;
             }
 
-            #script_tab_div {
+            .script_read_tab_div_class {
                 display: none;
             }
 
@@ -415,7 +467,8 @@ class terminal extends HTMLElement
         const html = `
         <div>
             <button class="tabname" id="term_tab">Terminal</button>
-            <button class="tabname" id="script_tab">Script</button>
+            <button class="tabname" id="script_read_tab">Script read</button>
+            <button class="tabname" id="script_write_tab">Script write</button>
         </div>
 
         <div id="term_tab_div">
@@ -460,12 +513,26 @@ class terminal extends HTMLElement
                 <span id="port_info">Disconnected</span>
             </div>
         </div>
-        <div id="script_tab_div">
-            <div id="script_window_div">
-                <textarea id="script_window">
+        <div class="script_read_tab_div_class" id="script_read_tab_div">
+            <div class="script_window_class">
+                <textarea class="script_textarea_class" id="script_read_textarea">
                 </textarea>
             </div>
+            <div class="flex_row">
+                <button id="script_read_save">Save</button>
+                <button id="script_read_restore_default">Restore default</button>
+            </div>
         </div>
+        <div class="script_read_tab_div_class" id="script_write_tab_div">
+             <div class="script_window_class">
+                 <textarea class="script_textarea_class" id="script_write_textarea">
+                 </textarea>
+             </div>
+             <div class="flex_row">
+             <button id="script_write_save">Save</button>
+             <button id="script_write_restore_default">Restore default</button>
+         </div>
+     </div>
 
             `
         this.attachShadow({ mode: 'open' })
@@ -493,17 +560,29 @@ class terminal extends HTMLElement
             this.shadowRoot.getElementById("rts_checkbox").addEventListener("click", this.rts_checkbox_clicked.bind(this))
 
             this.shadowRoot.getElementById("term_tab").addEventListener("click", this.active_term_tab.bind(this))
-            this.shadowRoot.getElementById("script_tab").addEventListener("click", this.active_script_tab.bind(this))
-            this.shadowRoot.getElementById("script_window").value =
-                "console.log(\"[script] [\"+line+\"]\")\n"+
-                "if (line == \"qwerty\") {\n"+
-                "    console.log(\"[script send_line] [ytrewq]\")\n"+
-                "    this.send_string(\"ytrewq\")\n"+
-                "}\n"+
-                "if (line == \"now\") {\n"+
-                "    this.send_string(\"now \"+\n"+
-                "        (Math.trunc(Date.now() / 1000) - 1680459000))\n"+
-                "}\n"
+            this.shadowRoot.getElementById("script_read_tab").addEventListener("click", this.active_script_read_tab.bind(this))
+            this.shadowRoot.getElementById("script_write_tab").addEventListener("click", this.active_script_write_tab.bind(this))
+
+            this.shadowRoot.getElementById("script_read_save").addEventListener("click", this.script_read_save_clicked.bind(this))
+            this.shadowRoot.getElementById("script_read_restore_default").addEventListener("click", this.script_read_restore_default_clicked.bind(this))
+            this.shadowRoot.getElementById("script_write_save").addEventListener("click", this.script_write_save_clicked.bind(this))
+            this.shadowRoot.getElementById("script_write_restore_default").addEventListener("click", this.script_write_restore_default_clicked.bind(this))
+
+
+            let script_read = localStorage.getItem("script_read");
+            if (script_read == null) {
+                this.shadowRoot.getElementById("script_read_textarea").value = this.default_script_read
+            } else {
+                this.shadowRoot.getElementById("script_read_textarea").value = script_read
+            }
+
+            let script_write = localStorage.getItem("script_write");
+            if (script_write == null) {
+                this.shadowRoot.getElementById("script_write_textarea").value = this.default_script_write
+            } else {
+                this.shadowRoot.getElementById("script_write_textarea").value = script_write
+            }
+
             this.clear_terminal()
 
             const params = new Proxy(new URLSearchParams(window.location.search), {
