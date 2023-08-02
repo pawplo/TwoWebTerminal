@@ -334,6 +334,7 @@ this.add_line("now", "line_read")
         this.shadowRoot.getElementById("term_tab_div").style.display = "block"
         this.shadowRoot.getElementById("script_read_tab_div").style.display = "none"
         this.shadowRoot.getElementById("script_write_tab_div").style.display = "none"
+        this.shadowRoot.getElementById("term_input").focus()
     }
 
     active_script_read_tab()
