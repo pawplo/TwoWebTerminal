@@ -196,8 +196,10 @@ this.add_line("now", "line_read");
         inner_text += "</span></br>";
         this.shadowRoot.getElementById("term_window").innerHTML += inner_text;
 
-        this.shadowRoot.getElementById("term_window").scrollTop =
+        if (this.shadowRoot.getElementById("auto_scroll_down_checkbox").checked) {
+            this.shadowRoot.getElementById("term_window").scrollTop =
             this.shadowRoot.getElementById("term_window").scrollHeight;
+        }
 
         if (line_read_or_write == "line_read") {
             this.read_line_script(line);
@@ -516,9 +518,10 @@ this.add_line("now", "line_read");
             </div>
             <div class="flex_row">
                 <input type="checkbox" id="dtr_checkbox" disabled>DTR</input>
-            </div>
-            <div class="flex_row">
+<!--            </div>
+            <div class="flex_row"> -->
                 <input type="checkbox" id="rts_checkbox" disabled>RTS</input>
+                <input type="checkbox" id="auto_scroll_down_checkbox">auto scroll down</input>
             </div>
             <div class="flex_row">
                 <span id="port_info">Disconnected</span>
@@ -569,6 +572,7 @@ this.add_line("now", "line_read");
 
             this.shadowRoot.getElementById("dtr_checkbox").addEventListener("click", this.dtr_checkbox_clicked.bind(this));
             this.shadowRoot.getElementById("rts_checkbox").addEventListener("click", this.rts_checkbox_clicked.bind(this));
+//            this.shadowRoot.getElementById("auto_scroll_down_checkbox").addEventListener("click", this._checkbox_clicked.bind(this));
 
             this.shadowRoot.getElementById("term_tab").addEventListener("click", this.active_term_tab.bind(this));
             this.shadowRoot.getElementById("script_read_tab").addEventListener("click", this.active_script_read_tab.bind(this));
